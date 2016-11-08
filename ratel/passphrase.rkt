@@ -11,26 +11,21 @@
          remove-passphrase-from-keyring)
 
 
-(define (read-passphrase [prompt-string "Passphrase: "])
-  (write-string prompt-string)
+(define (read-passphrase mount-name [prompt-string "Passphrase"])
   (let ([current-termios (cast (malloc _termios) _pointer _termios-pointer)]
-        [saved-termios (cast (malloc _termios) _pointer _termios-pointer)]
-        [passphrase #f])
-    (define (reset-attr)
-      (tcsetattr STDIN-FILENO TCSANOW saved-termios))
+        [pinentry (pinentry-connect)])
+    (tcgetattr STDIN-FILENO current-termios)
     (with-handlers ([(lambda (exn) #t) (lambda (exn)
-                                         (reset-attr)
+                                         (pinentry-disconnect pinentry)
+                                         (tcsetattr STDIN-FILENO TCSANOW
+                                                    current-termios)
                                          (raise exn))])
-      (tcgetattr STDIN-FILENO current-termios)
-      (memcpy saved-termios current-termios 1 _termios)
-      (set-termios-c_lflag! current-termios
-                            (bitwise-and (termios-c_lflag current-termios)
-                                         (bitwise-not 8)))
-      (tcsetattr STDIN-FILENO TCSAFLUSH current-termios)
-      (set! passphrase (read-line))
-      (write-string "\n")
-      (reset-attr)
-    passphrase)))
+      (pinentry-exec pinentry "SETDESC"
+                     (format "Enter eCryptfs passphrase for '~a'."
+                             mount-name))
+      (pinentry-exec pinentry "SETPROMPT" prompt-string)
+      (let-values ([(success data message) (pinentry-exec pinentry "GETPIN")])
+        (first data)))))
 
 
 (define (generate-passphrase-sig
@@ -62,3 +57,48 @@
           #:keyring [keyring KEY-SPEC-USER-KEYRING])
   (void
     (keyctl_unlink (keyctl_search keyring "user" signature 0) keyring)))
+
+
+(define-struct pinentry (subproc stdout stdin stderr))
+
+
+(define (pinentry-write-command pinentry command)
+  (let ([output-port (pinentry-stdin pinentry)])
+    (write-string command output-port)
+    (newline output-port)
+    (flush-output output-port)))
+
+
+(define (pinentry-read-response pinentry)
+  (define (message-result message)
+    (if (= 0 (string-length message))
+      #f
+      message))
+  (let loop ([data '()])
+    (match (regexp-match #px"^(OK|ERR|#|D)\\s?(.*)?"
+                         (read-line (pinentry-stdout pinentry)))
+      [(list _ type raw-data)
+       (case type
+         [("OK") (values #t data (message-result raw-data))]
+         [("ERR") (values #f data (message-result raw-data))]
+         [("D" "#") (loop (append data `(,raw-data)))])])))
+
+
+(define (pinentry-connect)
+  (let*-values ([(subproc stdout stdin stderr)
+                 (subprocess #f #f #f (find-executable-path "pinentry-tty")
+                             "--ttyname" (ttyname STDIN-FILENO))]
+                [(pinentry) (make-pinentry subproc stdout stdin stderr)]
+                [(start-success data message)
+                 (pinentry-read-response pinentry)])
+    pinentry))
+
+
+(define (pinentry-disconnect pinentry)
+  (subprocess-kill (pinentry-subproc pinentry) #f))
+
+
+(define (pinentry-exec pinentry command . args)
+  (pinentry-write-command pinentry
+                          (string-join (append `(,command) args)))
+  (pinentry-read-response pinentry))

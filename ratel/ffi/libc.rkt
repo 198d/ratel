@@ -40,3 +40,6 @@
                          (data : _pointer) -> _int))
 (define-libc umount (_fun #:save-errno 'posix
                           (target : _string) -> _int))
+
+
+(define-libc ttyname (_fun (fd : _int) -> _string))

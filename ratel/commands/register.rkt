@@ -36,7 +36,7 @@
       (error "Mount already exists"))
 
     (unless (ecryptfs-passphrase)
-      (ecryptfs-passphrase (read-passphrase)))
+      (ecryptfs-passphrase (read-passphrase name)))
 
     (let-values ([(passphrase-sig _)
                   (generate-passphrase-sig (ecryptfs-passphrase))])
