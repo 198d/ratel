@@ -16,6 +16,11 @@
 
 (command-line
   #:program "ratel"
+  #:once-each
+  [("--suid-helper") suid-helper
+                     ("Path to helper program with appropriate permissions "
+                      "for priveleged actions")
+                     (suid-helper-path (path->complete-path suid-helper))]
   #:ps "" "Available commands:" "    register mount umount show"
   #:args (command . args)
   (unless (hash-ref COMMANDS command #f)

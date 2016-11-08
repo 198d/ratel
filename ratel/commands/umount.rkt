@@ -11,10 +11,6 @@
   (command-line
     #:program "ratel umount"
     #:argv args
-    #:once-each
-    [("--suid-helper") suid-helper
-                       "Path to helper program with permissions to mount"
-                       (suid-helper-path (path->complete-path suid-helper))]
     #:args (name)
 
     (unless (mount-exists? name)

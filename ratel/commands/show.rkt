@@ -10,10 +10,6 @@
   (command-line
     #:program "ratel show"
     #:argv args
-    #:once-each
-    [("--suid-helper") suid-helper
-                       "Path to helper program with permissions to mount"
-                       (suid-helper-path (path->complete-path suid-helper))]
     #:args (name filename)
 
     (let ([mount-config (read-mount-config name)])
