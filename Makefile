@@ -1,7 +1,15 @@
-.PHONY: all
+.PHONY: all clean
 
 
-all: build/ratel-helper build/ratel
+all: build build/ratel-helper build/ratel
+
+
+build:
+	mkdir build
+
+
+clean:
+	rm -rf build
 
 
 build/ratel-helper: ratel/commands/suid-helper/*.rkt ratel/ffi/libc.rkt
