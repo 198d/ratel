@@ -9,6 +9,7 @@
          file->jsexpr
          jsexpr->file
          read-mount-config
+         read-all-mount-configs
          write-mount-config
          mount-exists?
          mounted?
@@ -48,6 +49,12 @@
                         (equal? (list-ref system-mount 1)
                                 (get-in mount-config '(mount target)))))
                  (read-system-mounts)))))
+
+
+(define (read-all-mount-configs)
+  (for/list ([path (directory-list (base-config-path) #:build? #t)]
+             #:when (regexp-match #rx".mount$" path))
+    (file->jsexpr path)))
 
 
 (define (read-mount-config name)
