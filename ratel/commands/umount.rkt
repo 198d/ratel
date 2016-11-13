@@ -1,5 +1,6 @@
 #lang racket
 (require "../config.rkt"
+         "../suid-helper.rkt"
          "../passphrase.rkt")
 
 
@@ -18,10 +19,7 @@
 
     (when (mounted? name)
       (let* ([config (read-mount-config name)]
-             [umount-result (system*/exit-code
-                              (suid-helper-path)
-                              "umount"
-                              (get-in config '(mount target)))])
+             [umount-result (suid-umount config)])
         (unless (zero? umount-result)
           (exit umount-result))
         (remove-passphrase-from-keyring

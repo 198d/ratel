@@ -1,6 +1,7 @@
 #lang racket
 (require "../config.rkt"
          "../system.rkt"
+         "../suid-helper.rkt"
          "../passphrase.rkt")
 
 
@@ -9,17 +10,6 @@
 
 (define ecryptfs-passphrase (make-parameter #f))
 (define mount-timeout (make-parameter #f))
-
-
-(define (suid-mount source target cipher key-bytes sig fnek-sig)
-  (system*/exit-code
-    (suid-helper-path) "mount" source target
-    (format
-      (string-append
-        "ecryptfs_check_dev_ruid,ecryptfs_cipher=~a,"
-        "ecryptfs_key_bytes=~a,ecryptfs_unlink_sigs,"
-        "ecryptfs_sig=~a,ecryptfs_fnek_sig=~a")
-      cipher key-bytes sig fnek-sig)))
 
 
 (define (main args)
@@ -50,11 +40,7 @@
                     (get-in config '(ecryptfs passphrase-sig)))
           (add-passphrase-to-keyring (ecryptfs-passphrase) #:timeout timeout)
           (error "Passphrase signature does not match mount config"))
-        (let ([mount-result (suid-mount (get-in config '(mount source))
-                                        (get-in config '(mount target))
-                                        (get-in config '(ecryptfs cipher))
-                                        (get-in config '(ecryptfs key-bytes))
-                                        passphrase-sig passphrase-sig)])
+        (let ([mount-result (suid-mount config)])
         (unless (zero? mount-result)
           (exit mount-result))
 
