@@ -8,6 +8,8 @@
          suid-helper-path
          file->jsexpr
          jsexpr->file
+         mount-config->jsexpr
+         jsexpr->mount-config
          read-mount-config
          read-all-mount-configs
          write-mount-config
@@ -19,9 +21,11 @@
 
 
 (define base-config-path
-  (make-parameter (build-path (find-system-path 'home-dir) ".ratel")))
+  (make-parameter (or (getenv "RATEL_BASE_CONFIG_PATH")
+                      (build-path (find-system-path 'home-dir) ".ratel"))))
 (define suid-helper-path
-  (make-parameter (find-executable-path "ratel-helper")))
+  (make-parameter (or (getenv "RATEL_SUID_HELPER_PATH")
+                      (find-executable-path "ratel-helper"))))
 
 
 (define (file->jsexpr path)
@@ -51,24 +55,32 @@
                  (read-system-mounts)))))
 
 
-(define (read-all-mount-configs)
-  (for/list ([path (directory-list (base-config-path) #:build? #t)]
-             #:when (regexp-match #rx".mount$" path))
-    (file->jsexpr path)))
-
-
-(define (read-mount-config name)
-  (~> (file->jsexpr (mount-config-path name))
+(define (jsexpr->mount-config jsexpr)
+  (~> jsexpr
       (update-in '(mount source) path->directory-path)
       (update-in '(mount target) path->directory-path)))
 
 
-(define (write-mount-config config)
+(define (mount-config->jsexpr config)
   (let ([directory-updater (compose path->string path->directory-path)])
-    (jsexpr->file (~> config
-                      (update-in '(mount source) directory-updater)
-                      (update-in '(mount target) directory-updater))
-                  (mount-config-path (get-in config '(name))))))
+    (~> config
+        (update-in '(mount source) directory-updater)
+        (update-in '(mount target) directory-updater))))
+
+
+(define (read-all-mount-configs)
+  (for/list ([path (directory-list (base-config-path) #:build? #t)]
+             #:when (regexp-match #rx".mount$" path))
+    (jsexpr->mount-config (file->jsexpr path))))
+
+
+(define (read-mount-config name)
+  (jsexpr->mount-config (file->jsexpr (mount-config-path name))))
+
+
+(define (write-mount-config config)
+  (jsexpr->file (mount-config->jsexpr config)
+                (mount-config-path (get-in config '(name)))))
 
 
 (define (member-in dict-value keys)
