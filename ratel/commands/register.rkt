@@ -50,6 +50,7 @@
               'ecryptfs (hash 'cipher (ecryptfs-cipher)
                               'key-bytes (ecryptfs-key-bytes)
                               'passphrase-sig passphrase-sig)
-              'mount (hash 'source source
-                           'target (or (mount-target) source)
+              'mount (hash 'source (path->complete-path source)
+                           'target (path->complete-path
+                                     (or (mount-target) source))
                            'timeout (mount-timeout)))))))
