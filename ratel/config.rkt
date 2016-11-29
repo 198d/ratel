@@ -44,15 +44,11 @@
   (file-exists? (mount-config-path name)))
 
 
-(define (mounted? name)
-  (let ([mount-config (read-mount-config name)])
-    (list? (memf (lambda (system-mount)
-                   (and (equal? (list-ref system-mount 2) "ecryptfs")
-                        (equal? (list-ref system-mount 0)
-                                (get-in mount-config '(mount source)))
-                        (equal? (list-ref system-mount 1)
-                                (get-in mount-config '(mount target)))))
-                 (read-system-mounts)))))
+(define (mounted? name-or-config)
+  (match name-or-config
+    [(? dict?) (mount-point? (get-in name-or-config '(mount source))
+                             (get-in name-or-config '(mount target)))]
+    [(? string?) (mounted? (read-mount-config name-or-config))]))
 
 
 (define (jsexpr->mount-config jsexpr)

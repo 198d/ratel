@@ -6,6 +6,7 @@
          "../passphrase.rkt"
          "../suid-helper.rkt")
 
+
 (provide get-mounts
          get-files
          get-file
@@ -13,9 +14,28 @@
          perform-umount)
 
 
+(define (jsify-keys jsexpr)
+  (if (hash? jsexpr)
+    (apply hasheq
+      (flatten
+        (hash-map jsexpr
+                  (lambda (key value)
+                    `(,(string->symbol
+                         (regexp-replace*
+                           #rx"-(.)" (symbol->string key)
+                           (lambda (match char)
+                             (string-upcase char))))
+                      ,(jsify-keys value))))))
+    jsexpr))
+
+
 (define (get-mounts request)
   (build-response/json
-    200 (map mount-config->jsexpr (read-all-mount-configs))))
+    200 (map (lambda (config)
+               (jsify-keys
+                 (hash-set (mount-config->jsexpr config)
+                           'is-mounted (mounted? config))))
+               (read-all-mount-configs))))
 
 
 (define (perform-mount request mount-name)
