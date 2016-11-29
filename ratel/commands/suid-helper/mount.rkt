@@ -14,8 +14,10 @@
     #:args (source target options)
 
     (unless (memf (lambda (config)
-                    (and (equal? (get-in config '(mount target)) target)
-                         (equal? (get-in config '(mount source)) source)))
+                    (and (equal? (get-in config '(mount target))
+                                 (string->path target))
+                         (equal? (get-in config '(mount source))
+                                 (string->path source))))
                   (read-all-mount-configs))
       (error "No mount matching the source and target is registered"))
 
