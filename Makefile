@@ -1,6 +1,9 @@
 .PHONY: all clean
 
 
+RACKET_COLLECTS_PATH=/usr/racket/collects
+
+
 all: build build/ratel-helper build/ratel
 
 
@@ -19,4 +22,4 @@ build/ratel-helper: ratel/commands/suid-helper/*.rkt ratel/config.rkt ratel/ffi/
 
 
 build/ratel: ratel/commands/*.rkt ratel/ffi/*.rkt ratel/*.rkt
-	raco exe -o build/ratel ratel/commands/main.rkt
+	raco exe --collects-path $(RACKET_COLLECTS_PATH) -o build/ratel ratel/commands/main.rkt

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Ratel Web</title>
+        <style>
+            #main {
+                font-size: 1.2em;
+                margin-top: 20px;
+                font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+            }
+            div.mount { margin-top: 10px; }
+            div.filename-actions i { cursor: pointer }
+            div.filename-actions a.file-action { color: inherit }
+            div.filename-actions .file-action { display: none; }
+            div.filename-actions:hover .file-action { display: inline-block; }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <% for (var i=0; i < htmlWebpackPlugin.files.css.length; i++) { %>
+        <link href="/static/<%= htmlWebpackPlugin.files.css[i] %>" rel="stylesheet">
+        <% } %>
+    </head>
+    <body>
+        <div id="main" class="container"></div>
+        <% for (var i=0; i < htmlWebpackPlugin.files.js.length; i++) { %>
+        <script src="/static/<%= htmlWebpackPlugin.files.js[i] %>"></script>
+        <% } %>
+    </body>
+</html>
