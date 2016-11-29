@@ -19,6 +19,9 @@
 (command-line
   #:program "ratel"
   #:once-each
+  [("--config-path") config-path
+                     "Path to the Ratel config directory"
+                     (base-config-path (path->complete-path config-path))]
   [("--suid-helper") suid-helper
                      ("Path to helper program with appropriate permissions "
                       "for priveleged actions")
@@ -28,6 +31,14 @@
   (unless (hash-ref COMMANDS command #f)
     (error "Command not implemented. Available commands:"
            (hash-keys COMMANDS)))
+
+  (environment-variables-set!
+    (current-environment-variables) #"RATEL_BASE_CONFIG_PATH"
+    (string->bytes/utf-8 (path->string (base-config-path))))
+  (environment-variables-set!
+    (current-environment-variables) #"RATEL_SUID_HELPER_PATH"
+    (string->bytes/utf-8 (path->string (suid-helper-path))))
+
   (umask #o77)
   (make-directory* (base-config-path))
   ((hash-ref COMMANDS command) args))
