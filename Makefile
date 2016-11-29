@@ -12,7 +12,7 @@ clean:
 	rm -rf build
 
 
-build/ratel-helper: ratel/commands/suid-helper/*.rkt ratel/ffi/libc.rkt
+build/ratel-helper: ratel/commands/suid-helper/*.rkt ratel/config.rkt ratel/ffi/libc.rkt
 	raco exe -o build/ratel-helper ratel/commands/suid-helper/main.rkt
 	sudo chown root:root build/ratel-helper
 	sudo chmod 4755 build/ratel-helper
