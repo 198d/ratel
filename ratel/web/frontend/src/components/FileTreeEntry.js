@@ -46,7 +46,8 @@ const generateFileActions = (isDirectory, mountName, path) => {
 
 
 const FileTreeEntry = ({path, children, mountName, name, depth, last}) => {
-    let displayName = children ? <span><strong className="text-info">{name}</strong>/</span> : <span>{name}</span>;
+    let displayName = children ? <span><span className="text-info">{name}</span>/</span>
+                               : <span>{name}</span>;
     return <div>
         <div className="filename-actions">
             <span>{makeTreeIndicator(depth, last)}</span>
