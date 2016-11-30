@@ -10,7 +10,7 @@ import { mergePropsIgnoringOwnProps } from "../util";
 import { fetchMountFiles } from "../actions";
 
 
-let MountFileTree = ({mount, dispatchers}) => {
+let MountFileTree = ({mount, children, dispatchers}) => {
     let { fetchMountFiles, pushRoute } = dispatchers;
 
     if (mount === undefined) {
@@ -27,9 +27,14 @@ let MountFileTree = ({mount, dispatchers}) => {
         return null;
     }
 
-    return <FileTreeEntry path="" children={mount.files}
-                          mountName={mount.name} name={mount.name}
-                          depth={0}/>
+    if (children) {
+        return children;
+    }
+    else {
+        return <FileTreeEntry path="" children={mount.files}
+                              mountName={mount.name} name={mount.name}
+                              depth={0}/>
+    }
 }
 
 
@@ -38,7 +43,7 @@ export default connect(
         let mountMap = state.getIn(["mounts", ownProps.params.name]),
             mount = mountMap && mountMap.toJS();
 
-        return { mount };
+        return { mount, children: ownProps.children };
     },
     (dispatch) => {
         return {

@@ -14,6 +14,7 @@ import { syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from "react-r
 import App from "./components/App";
 import MountList from "./containers/MountList";
 import MountFileTree from "./containers/MountFileTree";
+import MountFile from "./containers/MountFile";
 import { sortDirectoryEntries, expandChildren } from "./util";
 import { FETCH_MOUNTS_SUCCEEDED, FETCH_MOUNT_FILES_SUCCEEDED, CONFIRM_UNMOUNT,
          PROMPT_MOUNT_PASSPHRASE, ATTEMPT_MOUNT, ATTEMPT_UNMOUNT, RESET_MOUNT_VIEW,
@@ -127,7 +128,17 @@ ReactDOM.render(<Provider store={store}>
                                `#/${context.params.name}`, context.params.name
                            ]));
                    }}
-                   onLeave={() => store.dispatch(popBreadcrumb())}/>
+                   onLeave={() => store.dispatch(popBreadcrumb())}>
+                <Route path="files/**" component={MountFile}
+                       onEnter={(context) => {
+                           store.dispatch(
+                               pushBreadcrumb([
+                                   `#/${context.params.name}/${context.params.splat}`,
+                                   context.params.splat
+                               ]));
+                       }}
+                       onLeave={() => store.dispatch(popBreadcrumb())}/>
+            </Route>
         </Route>
     </Router>
 </Provider>, document.getElementById("main"));

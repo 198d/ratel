@@ -20,6 +20,11 @@ const buildDownloadUrl = (mountName, path) => {
 };
 
 
+const buildViewUrl = (mountName, path) => {
+    return `#/${mountName}/files${path ? `/${path}`: ""}`;
+};
+
+
 const generateChildEntries = (children, mountName, depth) => {
     if (!children || (children.length || 0) === 0) {
         return null;
@@ -39,6 +44,14 @@ const generateFileActions = (isDirectory, mountName, path) => {
             <i className="fa fa-download"></i>
         </a>
     ];
+
+    if (!isDirectory) {
+        entryActions = [
+            <a key="view" className="file-action" href={buildViewUrl(mountName, path)}>
+                <i className="fa fa-eye"></i>
+            </a>
+        ].concat(entryActions);
+    }
 
     return entryActions;
 };
