@@ -11,6 +11,14 @@
          remove-passphrase-from-keyring)
 
 
+(define default-keyring
+  (make-parameter
+    (case (getenv "RATEL_DEFAULT_KEYRING")
+      [("USER") KEY-SPEC-USER-KEYRING]
+      [("SESSION") KEY-SPEC-SESSION-KEYRING]
+      [else KEY-SPEC-USER-KEYRING])))
+
+
 (define (read-passphrase mount-name [prompt-string "Passphrase"])
   (let ([current-termios (cast (malloc _termios) _pointer _termios-pointer)]
         [pinentry (pinentry-connect)])
@@ -39,7 +47,7 @@
 
 (define (add-passphrase-to-keyring
           passphrase #:salt [salt (make-bytes ECRYPTFS-SALT-SIZE)]
-          #:keyring [keyring KEY-SPEC-USER-KEYRING]
+          #:keyring [keyring (default-keyring)]
           #:timeout [timeout 0])
   (let-values ([(auth-tok-pointer) (malloc SIZEOF-STRUCT-ECRYPTFS-AUTH-TOK)]
                [(passphrase-sig fekek)
@@ -54,7 +62,7 @@
 
 (define (remove-passphrase-from-keyring
           signature
-          #:keyring [keyring KEY-SPEC-USER-KEYRING])
+          #:keyring [keyring (default-keyring)])
   (void
     (keyctl_unlink (keyctl_search keyring "user" signature 0) keyring)))
 

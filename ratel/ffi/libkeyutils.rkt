@@ -23,3 +23,5 @@
                                         (destination : _int) -> _int))
 (define-libkeyutils keyctl_set_timeout (_fun (key : _int)
                                              (timeout : _uint) -> _long))
+(define-libkeyutils keyctl_join_session_keyring (_fun (name : _string)
+                                                      -> _int))

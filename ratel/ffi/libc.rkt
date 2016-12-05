@@ -13,6 +13,11 @@
 
 (define MS-NOSUID 2)
 (define MS-NODEV 4)
+(define MS-REC 16384)
+(define MS-PRIVATE 262144)
+
+
+(define CLONE-NEWNS 131072)
 
 
 (define-ffi-definer define-libc (ffi-lib #f))
@@ -43,3 +48,22 @@
 
 
 (define-libc ttyname (_fun (fd : _int) -> _string))
+
+
+(define-libc unshare (_fun #:save-errno 'posix
+                           (flags : _int) -> _int))
+
+
+(define-libc getuid (_fun #:save-errno 'posix
+                          -> _int))
+(define-libc getgid (_fun #:save-errno 'posix
+                          -> _int))
+(define-libc setuid (_fun #:save-errno 'posix
+                          (uid : _int) -> _int))
+(define-libc setgid (_fun #:save-errno 'posix
+                          (gid : _int) -> _int))
+
+
+(define-libc execvp (_fun #:save-errno 'posix
+                          (path : _string) (argv : (_list i _string))
+                          -> _int))

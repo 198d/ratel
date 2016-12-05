@@ -1,6 +1,9 @@
 #lang racket
-(require "../system.rkt"
+(require racket/os
+         ffi/unsafe
+         "../system.rkt"
          "../config.rkt"
+         "../ffi/libc.rkt"
          (prefix-in register: "register.rkt")
          (prefix-in mount: "mount.rkt")
          (prefix-in umount: "umount.rkt")
@@ -16,9 +19,16 @@
         "show" show:main))
 
 
+(define ratel-unshare (make-parameter #f))
+
+
 (command-line
   #:program "ratel"
   #:once-each
+  [("--unshare") ("Relaunches command in a new mount namespace with a new "
+                  "session keyring and unmounts all currently mounted "
+                  "filesystems")
+                (ratel-unshare #t)]
   [("--config-path") config-path
                      "Path to the Ratel config directory"
                      (base-config-path (path->complete-path config-path))]
@@ -41,4 +51,13 @@
 
   (umask #o77)
   (make-directory* (base-config-path))
+
+  (when (and (ratel-unshare) (not (getenv "RATEL_UNSHARING")))
+    (let* ([cmdline (file->string (format "/proc/~a/cmdline" (getpid)))]
+           [exe (resolve-path (format "/proc/~a/exe" (getpid)))]
+           [parsed-cmdline (string-split cmdline (bytes->string/utf-8 #"\0"))])
+      (execvp (suid-helper-path) (append `(,(suid-helper-path) "unshare")
+                                         `(,exe) parsed-cmdline '(#f)))
+      (error "could not execute unshare command" (saved-errno))))
+
   ((hash-ref COMMANDS command) args))
