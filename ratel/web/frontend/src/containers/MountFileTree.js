@@ -6,34 +6,96 @@ import { hashHistory } from "react-router";
 import { push } from "react-router-redux";
 
 import FileTreeEntry from "../components/FileTreeEntry";
+import MountFileTreeControls from "../components/MountFileTreeControls";
 import { mergePropsIgnoringOwnProps } from "../util";
 import { fetchMountFiles } from "../actions";
 
 
-let MountFileTree = ({mount, children, dispatchers}) => {
-    let { fetchMountFiles, pushRoute } = dispatchers;
+const pathMatchesFilter = (path, filter) => {
+    var i = 0, j = 0;
+    while (true) {
+        if (j == filter.length && i <= path.length)
+            return true;
+        if (i == path.length && j < filter.length)
+            return false;
+        if (path[i] == filter[j])
+            j++;
+        i++;
+    }
+};
 
-    if (mount === undefined) {
-        return null;
+
+const filterFiles = (files, filter) => {
+    if (!filter) {
+        return files;
     }
 
-    if (mount && !mount.isMounted) {
-        pushRoute("/");
-        return null;
+    return files.reduce( (accumulator, [name, path, children]) => {
+        if(children) {
+            let filteredChildren = filterFiles(children, filter);
+            if (filteredChildren.length > 0) {
+                accumulator.push([name, path, filteredChildren])
+            }
+        }
+        else {
+            if (pathMatchesFilter(path, filter)) {
+                accumulator.push([name, path, children]);
+            }
+        }
+        return accumulator;
+    }, []);
+};
+
+
+class MountFileTree extends React.Component {
+    constructor (props) {
+        super(props);
+        this.state = {
+            filter: null
+        };
     }
 
-    if (mount && !mount.files) {
-        fetchMountFiles(mount);
-        return null;
-    }
+    render () {
+        let {mount, children, dispatchers} = this.props,
+            { fetchMountFiles, pushRoute } = dispatchers;
 
-    if (children) {
-        return children;
-    }
-    else {
-        return <FileTreeEntry path="" children={mount.files}
-                              mountName={mount.name} name={mount.name}
-                              depth={0}/>
+        if (mount === undefined) {
+            return null;
+        }
+
+        if (mount && !mount.isMounted) {
+            pushRoute("/");
+            return null;
+        }
+
+        if (mount && !mount.files) {
+            fetchMountFiles(mount);
+            return null;
+        }
+
+        let filteredFiles = filterFiles(mount.files, this.state.filter);
+
+
+        if (children) {
+            return children;
+        }
+        else {
+            return <div>
+                <div className="row">
+                    <div className="col-sm-12">
+                        <MountFileTreeControls setFilter={(filter) => this.setState({filter})}
+                                               refreshFiles={() => fetchMountFiles(mount)}
+                                               currentFilter={this.state.filter}/>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-12">
+                        <FileTreeEntry path="" children={filteredFiles} mountName={mount.name}
+                                       name={mount.name} depth={0}/>
+                    </div>
+                </div>
+            </div>;
+        }
     }
 }
 

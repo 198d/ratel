@@ -3,9 +3,9 @@ import React from "react";
 import { spaceComponents } from "../util";
 
 
-const makeTreeIndicator = (depth, last) => {
+const makeTreeIndicator = (depth, last, parents) => {
     return (
-        (depth > 1 ? "\u2502\u00A0\u00A0" : "") +
+        (depth > 1 ? `${ parents[0].last ? "\u00A0" : "\u2502"}\u00A0\u00A0` : "") +
         ("\u00A0\u00A0\u00A0".repeat(depth - 2 >= 0 ? depth - 2 : 0)) +
         (depth > 0 ?
             (last ? "\u2514" : "\u251C") +
@@ -25,7 +25,9 @@ const buildViewUrl = (mountName, path) => {
 };
 
 
-const generateChildEntries = (children, mountName, depth) => {
+const generateChildEntries = (props) => {
+    let {children, mountName, depth, parents} = props;
+
     if (!children || (children.length || 0) === 0) {
         return null;
     }
@@ -33,7 +35,7 @@ const generateChildEntries = (children, mountName, depth) => {
     return children.map(
         ([name, path, children], index, data) =>
             <FileTreeEntry key={path} name={name} path={path} children={children}
-                           mountName={mountName}
+                           mountName={mountName} parents={parents ? parents.concat([props]) : []}
                            last={index == data.length - 1} depth={depth + 1}/>);
 };
 
@@ -116,16 +118,17 @@ const generateFileActions = (isDirectory, mountName, path) => {
 
 
 
-const FileTreeEntry = ({path, children, mountName, name, depth, last}) => {
-    let displayName = children ? <span><span className="text-info">{name}</span>/</span>
+const FileTreeEntry = (props) => {
+    let {path, children, mountName, name, depth, last, parents} = props,
+        displayName = children ? <span><span className="text-info">{name}</span>/</span>
                                : <span>{name}</span>;
     return <div>
         <div className="filename-actions">
-            <span>{makeTreeIndicator(depth, last)}</span>
+            <span>{makeTreeIndicator(depth, last, parents)}</span>
             {displayName}{" "}
             {spaceComponents(generateFileActions(children, mountName, path))}
         </div>
-        {generateChildEntries(children, mountName, depth)}
+        {generateChildEntries(props)}
     </div>;
 };
 
