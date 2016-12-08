@@ -69,7 +69,6 @@ class MountFileTree extends React.Component {
         }
 
         if (mount && !mount.files) {
-            fetchMountFiles(mount);
             return null;
         }
 
@@ -84,7 +83,6 @@ class MountFileTree extends React.Component {
                 <div className="row">
                     <div className="col-sm-12">
                         <MountFileTreeControls setFilter={(filter) => this.setState({filter})}
-                                               refreshFiles={() => fetchMountFiles(mount)}
                                                currentFilter={this.state.filter}/>
                     </div>
                 </div>

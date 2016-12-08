@@ -13,15 +13,26 @@ const ATTEMPT_UNMOUNT = "@@ratel/ATTEMPT_UNMOUNT";
 const PUSH_BREADCRUMB = "@@ratel/PUSH_BREADCRUMB";
 const POP_BREADCRUMB = "@@ratel/POP_BREADCRUMB";
 
+const PUSH_LOADING_JOB = "@@ratel/PUSH_LOADING_JOB";
+const POP_LOADING_JOB = "@@ratel/POP_LOADING_JOB";
+
 
 const fetchMounts = () => {
+    let loadingJobName = "mounts";
     return (dispatch) => {
+        dispatch(pushLoadingJob(loadingJobName));
         fetch("/api/mounts").then(response => {
+            dispatch(popLoadingJob(loadingJobName));
             return response.json()
         }).then(jsonData => {
             dispatch({
                 type: FETCH_MOUNTS_SUCCEEDED,
                 data: jsonData
+            });
+            jsonData.forEach((mount) => {
+                if (mount.isMounted) {
+                    dispatch(fetchMountFiles(mount));
+                }
             });
         }).catch( (exc) => {
             console.log(exc);
@@ -31,8 +42,11 @@ const fetchMounts = () => {
 
 
 const fetchMountFiles = (mount) => {
+    let loadingJobName = `${mount.name}-files`
     return (dispatch) => {
+        dispatch(pushLoadingJob(loadingJobName));
         fetch(`/api/mounts/${mount.name}/files`).then(response => {
+            dispatch(popLoadingJob(loadingJobName));
             return response.json();
         }).then(files => {
             dispatch({
@@ -107,6 +121,22 @@ const popBreadcrumb = () => {
 };
 
 
+const pushLoadingJob = (name) => {
+    return {
+        type: PUSH_LOADING_JOB,
+        name
+    };
+};
+
+
+const popLoadingJob = (name) => {
+    return {
+        type: POP_LOADING_JOB,
+        name
+    };
+};
+
+
 export {
     FETCH_MOUNTS_SUCCEEDED,
     FETCH_MOUNT_FILES_SUCCEEDED,
@@ -122,6 +152,9 @@ export {
 
     PUSH_BREADCRUMB,
     POP_BREADCRUMB,
+
+    PUSH_LOADING_JOB,
+    POP_LOADING_JOB,
 
     fetchMounts,
     fetchMountFiles,

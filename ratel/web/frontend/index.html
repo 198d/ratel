@@ -6,9 +6,10 @@
         <style>
             #main {
                 font-size: 1.2em;
-                margin-top: 20px;
                 font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
             }
+            div.navbar-actions { padding-right: 15px; }
+            ol.breadcrumb { padding: 0; background-color: inherit; margin: 0}
             div.mount { margin-top: 10px; }
             div.filename-actions i { cursor: pointer }
             div.filename-actions a.file-action { color: inherit }
@@ -21,7 +22,7 @@
         <% } %>
     </head>
     <body>
-        <div id="main" class="container"></div>
+        <div id="main"></div>
         <% for (var i=0; i < htmlWebpackPlugin.files.js.length; i++) { %>
         <script src="/static/<%= htmlWebpackPlugin.files.js[i] %>"></script>
         <% } %>

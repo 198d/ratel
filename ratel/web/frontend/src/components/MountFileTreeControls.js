@@ -16,10 +16,6 @@ export default ({setFilter, refreshFiles, currentFilter}) => {
                         disabled={!currentFilter}>
                     <i className="fa fa-close"></i>
                 </button>
-                <button type="button" className="btn btn-default"
-                        onClick={() => refreshFiles()}>
-                    <i className="fa fa-refresh"></i>
-                </button>
             </span>
         </div>
     </form>;

@@ -19,12 +19,14 @@ import { sortDirectoryEntries, expandChildren } from "./util";
 import { FETCH_MOUNTS_SUCCEEDED, FETCH_MOUNT_FILES_SUCCEEDED, CONFIRM_UNMOUNT,
          PROMPT_MOUNT_PASSPHRASE, ATTEMPT_MOUNT, ATTEMPT_UNMOUNT, RESET_MOUNT_VIEW,
          PUSH_BREADCRUMB, POP_BREADCRUMB, INCORRECT_MOUNT_PASSPHRASE, CLEAR_MOUNT_FILES,
-         fetchMounts, pushBreadcrumb, popBreadcrumb } from "./actions";
+         PUSH_LOADING_JOB, POP_LOADING_JOB, fetchMounts, pushBreadcrumb,
+         popBreadcrumb } from "./actions";
 
 
 const initialState = Immutable.fromJS({
     mounts: {},
     mountViews: {},
+    loadingJobs: Immutable.Set(),
     breadcrumbs: [],
     routing: {}
 });
@@ -87,6 +89,12 @@ const reducer = (state = initialState, action) => {
 
         case POP_BREADCRUMB:
             return state.update("breadcrumbs", (val) => val.pop());
+
+        case PUSH_LOADING_JOB:
+            return state.update("loadingJobs", (val) => val.add(action.name));
+
+        case POP_LOADING_JOB:
+            return state.update("loadingJobs", (val) => val.delete(action.name));
 
     }
     return state;
