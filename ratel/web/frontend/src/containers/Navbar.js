@@ -2,7 +2,20 @@ import React from "react";
 import { bindActionCreators } from "redux";
 import { connect  } from "react-redux";
 
-import { fetchMounts } from "../actions";
+import { fetchMounts, clearSearch, setSearch } from "../actions";
+
+
+const SearchBar = ({onKeyUp}) => {
+    return <div className="row">
+        <div className="col-md-8 col-md-offset-2">
+            <p><input type="text" className="form-control"
+                      onKeyUp={onKeyUp}
+                      autoComplete={false} autoCorrect={false} autoCapitalize={false}
+                      spellCheck={false}
+                      placeholder="Search for files in available mounts"/></p>
+        </div>
+    </div>;
+};
 
 
 class Navbar extends React.Component {
@@ -14,12 +27,9 @@ class Navbar extends React.Component {
     }
 
     render () {
-        let { loadingJobs, fetchMounts } = this.props,
+        let { loadingJobs, fetchMounts, clearSearch, setSearch } = this.props,
             searchButtonClasses = ["btn", "btn-default", "navbar-btn"],
-            refreshIconClasses = ["fa", "fa-refresh"],
-            searchRowStyle = {
-                display: this.state.searching ? "block" : "none"
-            };
+            refreshIconClasses = ["fa", "fa-refresh"];
 
         if (this.state.searching) {
             searchButtonClasses.push("active");
@@ -30,10 +40,29 @@ class Navbar extends React.Component {
         }
 
         let toggleSearching = () => {
+            if (!!this.state.searching) {
+                clearSearch();
+            }
             this.setState({
                 searching: !this.state.searching
             });
         };
+
+        let setSearchTimeout,
+            onKeyUp = (ev) => {
+                let value = ev.target.value;
+                if (setSearchTimeout) {
+                    clearTimeout(setSearchTimeout);
+                }
+                setSearchTimeout = setTimeout(() => {
+                    if (value !== "") {
+                        setSearch(value);
+                    }
+                    else {
+                        clearSearch();
+                    }
+                }, 100);
+            };
 
         return <nav className="navbar navbar-default">
             <div className="container">
@@ -41,10 +70,10 @@ class Navbar extends React.Component {
                     <div className="col-md-8 col-md-offset-2">
                         <a href="#/" className="navbar-brand">Ratel</a>{" "}
                         <div className="navbar-right navbar-actions">
-                            {/*<button type="button" className={searchButtonClasses.join(" ")}
+                            <button type="button" className={searchButtonClasses.join(" ")}
                                     onClick={toggleSearching}>
                                 <i className="fa fa-search"></i>
-                            </button>{" "}*/}
+                            </button>{" "}
                             <button type="button" onClick={() => fetchMounts()}
                                     className="btn btn-default navbar-btn">
                                 <i className={refreshIconClasses.join(" ")}></i>
@@ -52,12 +81,7 @@ class Navbar extends React.Component {
                         </div>
                     </div>
                 </div>
-                {/*<div className="row" style={searchRowStyle}>
-                    <div className="col-md-8 col-md-offset-2">
-                        <p><input type="text" className="form-control"
-                                  placeholder="Enter text to find files and mounts"/></p>
-                    </div>
-                </div>*/}
+                { this.state.searching ? <SearchBar onKeyUp={onKeyUp}/> : null }
             </div>
         </nav>;
     }
@@ -71,6 +95,6 @@ export default connect(
         }
     },
     (dispatch) => {
-        return bindActionCreators({ fetchMounts }, dispatch);
+        return bindActionCreators({ fetchMounts, clearSearch, setSearch }, dispatch);
     }
 )(Navbar);

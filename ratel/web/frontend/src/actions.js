@@ -16,6 +16,9 @@ const POP_BREADCRUMB = "@@ratel/POP_BREADCRUMB";
 const PUSH_LOADING_JOB = "@@ratel/PUSH_LOADING_JOB";
 const POP_LOADING_JOB = "@@ratel/POP_LOADING_JOB";
 
+const SET_SEARCH = "@@ratel/SET_SEARCH";
+const CLEAR_SEARCH = "@@ratel/CLEAR_SEARCH";
+
 
 const fetchMounts = () => {
     let loadingJobName = "mounts";
@@ -80,7 +83,6 @@ const attemptMount = (mount, passphrase) => {
             } else {
               dispatch(resetMountView(mount));
               dispatch(fetchMounts());
-              dispatch(fetchMountFiles(mount));
             }
         }).catch(exc => console.log(exc));
     }
@@ -137,6 +139,21 @@ const popLoadingJob = (name) => {
 };
 
 
+const setSearch = (searchString) => {
+    return {
+        type: SET_SEARCH,
+        searchString
+    };
+};
+
+
+const clearSearch = () => {
+    return {
+        type: CLEAR_SEARCH
+    };
+};
+
+
 export {
     FETCH_MOUNTS_SUCCEEDED,
     FETCH_MOUNT_FILES_SUCCEEDED,
@@ -156,6 +173,9 @@ export {
     PUSH_LOADING_JOB,
     POP_LOADING_JOB,
 
+    SET_SEARCH,
+    CLEAR_SEARCH,
+
     fetchMounts,
     fetchMountFiles,
     clearMountFiles,
@@ -169,5 +189,8 @@ export {
     attemptUnmount,
 
     pushBreadcrumb,
-    popBreadcrumb
+    popBreadcrumb,
+
+    setSearch,
+    clearSearch
 }

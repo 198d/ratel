@@ -8,11 +8,35 @@
                 font-size: 1.2em;
                 font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
             }
+
+            ul.search-results {
+                margin-bottom: 10px;
+                margin-top: -20px;
+                padding: 15px;
+                border-color: #e7e7e7;
+                border-width: 0px 1px 1px 1px;
+                border-style: solid;
+            }
+            ul.search-results li {
+                margin-bottom: 10px;
+            }
+            ul.search-results li:last-child { margin-bottom: 0 }
+
             div.navbar-actions { padding-right: 15px; }
+
             ol.breadcrumb { padding: 0; background-color: inherit; margin: 0}
+
             div.mount { margin-top: 10px; }
-            div.filename-actions i { cursor: pointer }
-            div.filename-actions a.file-action { color: inherit }
+
+            div.filename-actions i,
+            span.search-result-actions i { cursor: pointer }
+
+            div.filename-actions a.file-action,
+            span.search-result-actions a { color: inherit }
+
+            ul.search-results li span.search-result-actions { display: none }
+            ul.search-results li:hover span.search-result-actions { display: inline-block }
+
             div.filename-actions .file-action { display: none; }
             div.filename-actions:hover .file-action { display: inline-block; }
         </style>
