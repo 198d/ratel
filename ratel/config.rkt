@@ -51,6 +51,14 @@
     [(? string?) (mounted? (read-mount-config name-or-config))]))
 
 
+(define (mount-point? source target)
+  (list? (memf (lambda (system-mount)
+                 (and (equal? (list-ref system-mount 2) "ecryptfs")
+                      (equal? (list-ref system-mount 0) source)
+                      (equal? (list-ref system-mount 1) target)))
+               (read-system-mounts))))
+
+
 (define (jsexpr->mount-config jsexpr)
   (~> jsexpr
       (update-in '(mount source) path->directory-path)

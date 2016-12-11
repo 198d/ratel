@@ -32,8 +32,6 @@
   (dispatch-rules
     [("api" "mounts")
      #:method "get" get-mounts]
-    [("api" "mounts" (string-arg))
-     #:method "get" get-mount]
     [("api" "mounts" (string-arg) "mount")
      #:method "post" perform-mount]
     [("api" "mounts" (string-arg) "umount")
