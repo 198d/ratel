@@ -3,6 +3,8 @@ import React from "react";
 import Navbar from "../containers/Navbar";
 import Breadcrumbs from "../containers/Breadcrumbs";
 import SearchResults from "../containers/SearchResults";
+import Messages from "../containers/Messages";
+
 
 export default ({ children }) => {
     return <div>
@@ -17,5 +19,6 @@ export default ({ children }) => {
                 </div>
             </div>
         </div>
+        <Messages/>
     </div>;
 }

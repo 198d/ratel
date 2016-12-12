@@ -1,4 +1,8 @@
 import React from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+
+import { pushMessage } from "../actions";
 
 
 const selectFake = (text) => {
@@ -33,21 +37,20 @@ const selectFake = (text) => {
 };
 
 
-
-
-const copyEntry = (mountName, path) => {
+const copyEntry = (mountName, path, pushMessage) => {
     let fakeTextarea = null,
         copyText = () => {
             if(fakeTextarea) {
                 document.execCommand("copy");
                 document.body.removeChild(fakeTextarea);
+                pushMessage("success", "Copied");
             }
             else if(fakeTextarea === null) {
-                setTimeout(copyText, 250);
+                setTimeout(copyText, 100);
             }
         };
 
-    setTimeout(copyText, 250);
+    setTimeout(copyText, 100);
 
     fetch(`/files/${mountName}/${path}`).then(
         response => {
@@ -58,9 +61,16 @@ const copyEntry = (mountName, path) => {
 };
 
 
-export default ({mountName, path}) => {
-    return <span onClick={() => copyEntry(mountName, path)} className="file-action">
+const CopyFile = ({mountName, path, pushMessage}) => {
+    return <span onClick={() => copyEntry(mountName, path, pushMessage)} className="file-action">
         <i className="fa fa-clipboard"></i>
     </span>;
-}
+};
 
+
+export default connect(
+    undefined,
+    (dispatch) => {
+        return bindActionCreators({ pushMessage }, dispatch);
+    }
+)(CopyFile);

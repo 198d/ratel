@@ -2,7 +2,7 @@ import React from "react";
 
 import DownloadFile from "./DownloadFile";
 import ViewFile from "./ViewFile";
-import CopyFile from "./CopyFile";
+import CopyFile from "../containers/CopyFile";
 import { spaceComponents } from "../util";
 
 

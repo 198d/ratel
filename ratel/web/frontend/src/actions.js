@@ -19,6 +19,9 @@ const POP_LOADING_JOB = "@@ratel/POP_LOADING_JOB";
 const SET_SEARCH = "@@ratel/SET_SEARCH";
 const CLEAR_SEARCH = "@@ratel/CLEAR_SEARCH";
 
+const PUSH_MESSAGE = "@@ratel/PUSH_MESSAGE";
+const POP_MESSAGE = "@@ratel/POP_MESSAGE";
+
 
 const fetchMounts = () => {
     let loadingJobName = "mounts";
@@ -154,6 +157,24 @@ const clearSearch = () => {
 };
 
 
+const pushMessage = (level, message) => {
+    return (dispatch) => {
+        dispatch({
+            type: PUSH_MESSAGE,
+            level, message
+        });
+        setTimeout(() => dispatch(popMessage()), 1500);
+    };
+};
+
+
+const popMessage = () => {
+    return {
+        type: POP_MESSAGE,
+    };
+};
+
+
 export {
     FETCH_MOUNTS_SUCCEEDED,
     FETCH_MOUNT_FILES_SUCCEEDED,
@@ -176,6 +197,9 @@ export {
     SET_SEARCH,
     CLEAR_SEARCH,
 
+    PUSH_MESSAGE,
+    POP_MESSAGE,
+
     fetchMounts,
     fetchMountFiles,
     clearMountFiles,
@@ -192,5 +216,8 @@ export {
     popBreadcrumb,
 
     setSearch,
-    clearSearch
+    clearSearch,
+
+    pushMessage,
+    popMessage
 }

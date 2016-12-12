@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 
 import DownloadFile from "../components/DownloadFile";
 import ViewFile from "../components/ViewFile";
-import CopyFile from "../components/CopyFile";
+import CopyFile from "../containers/CopyFile";
 
 
 const scoreFile = (path, searchString) => {

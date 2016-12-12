@@ -19,8 +19,8 @@ import { sortDirectoryEntries, expandChildren } from "./util";
 import { FETCH_MOUNTS_SUCCEEDED, FETCH_MOUNT_FILES_SUCCEEDED, CONFIRM_UNMOUNT,
          PROMPT_MOUNT_PASSPHRASE, ATTEMPT_MOUNT, ATTEMPT_UNMOUNT, RESET_MOUNT_VIEW,
          PUSH_BREADCRUMB, POP_BREADCRUMB, INCORRECT_MOUNT_PASSPHRASE, CLEAR_MOUNT_FILES,
-         PUSH_LOADING_JOB, POP_LOADING_JOB, SET_SEARCH, CLEAR_SEARCH, fetchMounts,
-         pushBreadcrumb, popBreadcrumb } from "./actions";
+         PUSH_LOADING_JOB, POP_LOADING_JOB, SET_SEARCH, CLEAR_SEARCH,
+         PUSH_MESSAGE, POP_MESSAGE, fetchMounts, pushBreadcrumb, popBreadcrumb } from "./actions";
 
 
 const initialState = Immutable.fromJS({
@@ -29,6 +29,7 @@ const initialState = Immutable.fromJS({
     loadingJobs: Immutable.Set(),
     breadcrumbs: [],
     searchString: null,
+    messages: [],
     routing: {}
 });
 
@@ -102,6 +103,14 @@ const reducer = (state = initialState, action) => {
 
        case SET_SEARCH:
             return state.set("searchString", action.searchString);
+
+       case PUSH_MESSAGE:
+            let {level, message} = action;
+            return state.update("messages", (val) => val.push({level, message}));
+
+       case POP_MESSAGE:
+            return state.update("messages", (val) => val.pop());
+
     }
     return state;
 }
