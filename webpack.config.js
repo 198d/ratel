@@ -8,7 +8,7 @@ module.exports = {
     entry: ["whatwg-fetch", "./src/index.js"],
     output: {
         path: __dirname + "/ratel/web/frontend/build",
-        filename: "main.js"
+        filename: "static/[name].js"
     },
     module: {
         loaders: [
@@ -21,14 +21,12 @@ module.exports = {
                 }
             },
             { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
-            { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-              loader: "url-loader?limit=10000&minetype=application/font-woff" },
-            { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-              loader: "file-loader" }
+            { test: /\.(ttf|eot|svg|woff2?)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+              loader: "file-loader?name=static/[hash].[ext]&publicPath=/" }
         ]
     },
     plugins: [
-        new ExtractTextPlugin("[name].css"),
+        new ExtractTextPlugin("static/[name].css"),
         new HtmlWebpackPlugin({
             template: "index.html",
             inject: false

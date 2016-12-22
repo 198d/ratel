@@ -1,6 +1,5 @@
 #lang racket
 (require net/url
-         threading
          racket/runtime-path
          web-server/http
          web-server/dispatch
@@ -9,8 +8,9 @@
          web-server/managers/none
          web-server/servlet/setup
          web-server/private/mime-types
-         (rename-in web-server/dispatchers/dispatch-servlets
-                    [make make-servlet-dispatcher])
+         web-server/dispatchers/filesystem-map
+         (prefix-in dispatch-servlets:
+                    web-server/dispatchers/dispatch-servlets)
          (prefix-in dispatch-files: web-server/dispatchers/dispatch-files)
          "http.rkt"
          "actions.rkt")
@@ -63,32 +63,16 @@
 
 
 (define (dispatcher conn req)
-  (let* ([path-pieces (~> (request-uri req)
-                          url->path
-                          simplify-path
-                          explode-path
-                          cdr)]
-         [static-path? (or (empty? path-pieces)
-                           (equal? (path->string (car path-pieces))
-                                   "static"))]
-         [asset-path
-          (when static-path?
-            (apply build-path (append `(,STATIC-ASSETS-DIR)
-                                      (if (empty? path-pieces)
-                                        '()
-                                        (cdr path-pieces)))))])
-    (if (and static-path? (or (file-exists? asset-path)
-                              (directory-exists? asset-path)))
-      ((dispatch-files:make
-         #:url->path (lambda (url)
-                       (values asset-path (explode-path asset-path)))
-         #:path->mime-type (make-path->mime-type MIME-TYPES))
-       conn req)
-      ((make-servlet-dispatcher
-        (lambda (url)
-          (make-stateless.servlet
-            (current-directory)
-            (make-stuffer identity identity)
-            (create-none-manager #f)
-            servlet-start)))
-       conn req))))
+  (let loop ([dispatchers
+              `(,(dispatch-files:make
+                  #:url->path (make-url->path STATIC-ASSETS-DIR)
+                  #:path->mime-type (make-path->mime-type MIME-TYPES))
+                ,(dispatch-servlets:make
+                  (lambda (url)
+                    (make-stateless.servlet
+                      (current-directory)
+                      (make-stuffer identity identity)
+                      (create-none-manager #f)
+                      servlet-start))))])
+    (with-handlers ([exn:dispatcher? (lambda (exc) (loop (cdr dispatchers)))])
+      ((car dispatchers) conn req))))
