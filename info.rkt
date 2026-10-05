@@ -1,6 +1,7 @@
 #lang info
 (define collection 'multi)
-(define deps '("base"
+(define deps '("web-server-lib"
+               "base"
                ; "rackunit-lib"
                "threading"))
 ; (define build-deps '("scribble-lib" "racket-doc"))
